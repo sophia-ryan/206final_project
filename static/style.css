@@ -1,0 +1,9 @@
+#demotext {
+border: 10px dotted #1C6EA4;
+}
+
+h1 {
+color: rgb(255, 255, 255);
+background-color: rgb(51, 51, 51);
+text-shadow: rgb(255, 255, 255) 0px 0px 5px, rgb(255, 255, 255) 0px 0px 10px, rgb(255, 255, 255) 0px 0px 15px, rgb(255, 45, 149) 0px 0px 20px, rgb(255, 45, 149) 0px 0px 30px, rgb(255, 45, 149) 0px 0px 40px, rgb(255, 45, 149) 0px 0px 50px, rgb(255, 45, 149) 0px 0px 75px;
+}
