@@ -17,7 +17,6 @@ soup = BeautifulSoup(html, 'html.parser')
 # on startup, try to load the cache from file
 # just want to cache the html
 CACHE_FNAME = 'cache.json'
-DBNAME = 'restaurant.db'
 
 try:
     cache_file = open(CACHE_FNAME, 'r')
@@ -40,15 +39,13 @@ def make_request_using_cache(url):
 
     ## first, look in the cache to see if we already have this data
     if unique_ident in CACHE_DICTION:
-        print("Getting cached data...")
-        print()
+        print("Loading cached data...")
         return CACHE_DICTION[unique_ident]
 
     ## if not, fetch the data afresh, add it to the cache,
     ## then write the cache to file
     else:
         print("Making a request for new data...")
-        print()
         # Make the request and cache the new data
         resp = requests.get(url).text
         CACHE_DICTION[unique_ident] = resp
@@ -110,7 +107,7 @@ def get_ddd_for_state(state_name):
 
 # Read data from CSV & JSON into Database
 
-
+DBNAME = 'restaurant.db'
 
 def init_db():
     try:
@@ -144,15 +141,6 @@ def init_db():
     cur.execute(statement)
     conn.commit()
 
-    # statement = '''
-    #             CREATE TABLE `Episode` (
-    #         	`Id`	INTEGER PRIMARY KEY AUTOINCREMENT,
-    #         	`EpisodeName`	TEXT,
-    #             `SeasonNumber`  INTEGER,
-    #             CONSTRAINT name_unique UNIQUE('EpisodeName')
-    #         );
-    #             '''
-
     statement = '''
                 CREATE TABLE `Episode` (
             	`Id`	INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -169,12 +157,21 @@ def insert_episode(restaurant_list):
     conn = sqlite3.connect(DBNAME)
     cur = conn.cursor()
 
-    # NEED TO FIX THE FACT THAT NOT CATCHING THE SAME EPISODE
+    # NEED TO FIX THE FACT THAT NOT CATCHING THE SAME EPISODES
     for restaurant in restaurant_list:
-        # statement = 'INSERT OR IGNORE INTO Episode Values (?,?,?)'
+
+        # result = cur.fetchone()
+        # if result is None:
+        #     pass
+        # else:
+        #     statement = 'INSERT INTO Episode Values (?,?,?)'
+        #     insert = (None,restaurant[4] ,restaurant[3])
+        #     cur.execute(statement, insert)
+
         statement = 'INSERT INTO Episode Values (?,?,?)'
         insert = (None,restaurant[4] ,restaurant[3])
         cur.execute(statement, insert)
+
 
         conn.commit()
     conn.close()
@@ -187,8 +184,9 @@ def match_data():
 
     episode_map = {}
 
-    for ep in q:
-        episode_map[ep[1].upper()] = ep[0]
+    for ep in cur:
+        # it's coming in here but not setting
+        episode_map[ep[1]] = ep[0]
 
     return episode_map
 
@@ -198,25 +196,16 @@ def insert_restaurants(restaurant_list):
     cur = conn.cursor()
     for restaurant in restaurant_list:
         statement = 'INSERT INTO Restaurants Values (?,?,?,?,?)'
+        # this is suppose to connect the two but it isn't working
+        # insert = (None, restaurant[0], restaurant[1], episode_map[restaurant[3]], restaurant[2])
+        insert = (None, restaurant[0], restaurant[1], "0", restaurant[2])
+        cur.execute(statement, insert)
 
-        # try:
-        #     insert = (None, restaurant[0], restaurant[1], episode_map[restaurant[0]], restaurant[2])
-        #     cur.execute(statement, insert)
-
-        if restaurant[0] in episode_map:
-            insert = (None, restaurant[0], restaurant[1], episode_map[restaurant[0]], restaurant[2])
-            cur.execute(statement, insert)
-        else:
-            pass
-
-        # insert = (None, restaurant[0], restaurant[1], "0", restaurant[2])
-        # cur.execute(statement, insert)
-        #
         conn.commit()
     conn.close()
 
 # NEVER DO FOR DATA THATS ALREADY WORKED!! It duplicates the restaurants in db
-state_list = get_ddd_for_state('michigan')
+state_list = get_ddd_for_state('wyoming')
 # init_db()
 insert_episode(state_list)
 # match_data()
