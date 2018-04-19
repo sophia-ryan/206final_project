@@ -17,6 +17,7 @@ soup = BeautifulSoup(html, 'html.parser')
 # on startup, try to load the cache from file
 # just want to cache the html
 CACHE_FNAME = 'cache.json'
+DBNAME = 'restaurant.db'
 
 try:
     cache_file = open(CACHE_FNAME, 'r')
@@ -106,8 +107,6 @@ def get_ddd_for_state(state_name):
 # the restaurants are going to be in there
 
 # Read data from CSV & JSON into Database
-
-DBNAME = 'restaurant.db'
 
 def init_db():
     try:
@@ -205,7 +204,7 @@ def insert_restaurants(restaurant_list):
     conn.close()
 
 # NEVER DO FOR DATA THATS ALREADY WORKED!! It duplicates the restaurants in db
-state_list = get_ddd_for_state('wyoming')
+state_list = get_ddd_for_state('spain')
 # init_db()
 insert_episode(state_list)
 # match_data()
