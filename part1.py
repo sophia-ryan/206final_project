@@ -12,19 +12,6 @@ soup = BeautifulSoup(html, 'html.parser')
 # diners, drive - ins and dives in that state
 # info is displayed as HTML on Flask
 
-class Restaurant:
-    def __init__(self, name, address, city, state, phone, price, reserve_url=None):
-        self.name = rest_name
-        self.address = rest_address
-        self.city = rest_city
-        self.state = rest_city
-        self.phone = rest_phone
-        self.price = rest_price
-        self.reserve_url = reserve_url
-
-    def __str__(self): # need to add extra params
-        pass
-
 ## CACHING FOR GET_DDD_FOR_STATE
 
 # on startup, try to load the cache from file
@@ -99,6 +86,7 @@ def get_ddd_for_state(state_name):
         for data in table.find_all('td'):
             # data from first, overall state page
             phone = data.i.text.strip()
+            # print(phone)
             name = data.a.text.strip()
             full_string = data.text.replace('\n', '').strip()
             address = full_string[len(name): full_string.index(phone)].strip()
@@ -171,42 +159,82 @@ def insert_episode(restaurant_list):
     conn = sqlite3.connect(DBNAME)
     cur = conn.cursor()
 
+    # NEED TO FIX THE FACT THAT NOT CATCHING THE SAME EPISODES
     for restaurant in restaurant_list:
-        statement = 'INSERT INTO Episode Values (?,?,?)'
-        insert = (None, restaurant[3], restaurant[4])
-        cur.execute(statement, insert)
+        # name = restaurant[4]
+        # q = cur.execute("SELECT COUNT(*) FROM Episode WHERE EpisodeName LIKE '%{}' ".format(name)
+        result = cur.fetchone()
+        if result is None:
+            pass
+        else:
+            statement = 'INSERT INTO Episode Values (?,?,?)'
+            insert = (None,restaurant[4] ,restaurant[3])
+            cur.execute(statement, insert)
 
         conn.commit()
     conn.close()
 
-def match_data(restaurant_list):
+def match_data():
     conn = sqlite3.connect(DBNAME)
     cur = conn.cursor()
 
     q = cur.execute("SELECT * FROM Episode").fetchall()
 
-    global episode_id
+    episode_map = {}
 
-    for restaurant in restaurant_list:
-        for iterate in q:
-            if restaurant[3] in iterate:
-                episode_id = iterate[0]
-        conn.commit()
-    conn.close()
+    for ep in cur:
+        # it's coming in here but not setting
+        episode_map[ep[1]] = ep[0]
+
+    return episode_map
 
 def insert_restaurants(restaurant_list):
+    episode_map = match_data()
     conn = sqlite3.connect(DBNAME)
     cur = conn.cursor()
     for restaurant in restaurant_list:
         statement = 'INSERT INTO Restaurants Values (?,?,?,?,?)'
-        insert = (None, restaurant[0], restaurant[1], episode_id, restaurant[2])
+        # insert = (None, restaurant[0], restaurant[1], episode_map[restaurant[3]], restaurant[2])
+        insert = (None, restaurant[0], restaurant[1], "0", restaurant[2])
         cur.execute(statement, insert)
 
         conn.commit()
     conn.close()
 
-alabama_list = get_ddd_for_state('alabama')
-init_db()
-insert_episode(alabama_list)
-match_data(alabama_list)
-insert_restaurants(alabama_list)
+# NEVER DO FOR DATA THATS ALREADY WORKED!! It duplicates the restaurants in db
+state_list = get_ddd_for_state('mexico')
+# init_db()
+insert_episode(state_list)
+match_data()
+insert_restaurants(state_list)
+
+# states that didn't work - it's occuring in the same place
+
+# uk
+# bc
+# mexico
+# west virginia
+# utah
+# tennessee
+# south carolina
+# rhode island
+# oklahoma
+# north carolina
+# new york
+# new mexico
+# new jersey
+# new hampshire
+# nevada
+# missouri
+# Mississipi
+# minnesota
+# massachusetts
+# maryland
+# california
+# connecticut
+# dc
+# hawaii
+# illinois
+# indiana
+# kansas
+# maine
