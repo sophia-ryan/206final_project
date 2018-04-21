@@ -1,0 +1,9 @@
+
+<h1> Restaurants from Diners, Drive-Ins & Dives in {{stateName}} </h1>
+
+<table>
+{% for item in rests %}
+    <tr>
+        <b> Restaurant Name: </b> {{ item.name }} | <b> Address: </b> {{ item.address }} | <b> Featured on Episode: </b> {{ item.episode }} | <b> Phone Number: </b> {{ item.phone_number }} <br \> <br \>
+    </td>
+{% endfor %}
